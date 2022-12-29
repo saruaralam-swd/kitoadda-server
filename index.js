@@ -2,9 +2,8 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-require('colors');
 require('dotenv').config();
-
+require('colors');
 
 app.use(cors());
 app.use(express.json());
@@ -19,16 +18,29 @@ async function run() {
     await client.connect()
     console.log('DB Connected'.yellow.italic);
 
-    app.get('/data', (req, res) => {
-      res.send({name: 'saruar'})
-    });
+    const postCollection = client.db('KitoAdda').collection('allPost');
+    const userCollection = client.db('KitoAdda').collection('users');
+
+    app.post('/postData', async (req, res) => {
+      const data = req.body;
+      const result = await postCollection.insertOne(data);
+      res.send(result);
+    })
+
+    app.get('/allPost', async(req, res) => {
+      const query = {};
+      const result = await postCollection.find(query).toArray();
+      res.send(result);
+    })
   }
+
   finally {
 
   }
 }
 
 run().catch(error => console.log(error.name.bgRed, error.message.bold));
+
 
 app.get('/', (req, res) => {
   res.send('kitoAdda server is running')
