@@ -19,8 +19,9 @@ async function run() {
     await client.connect()
     console.log('DB Connected'.yellow.italic);
 
-  
-
+    app.get('/data', (req, res) => {
+      res.send({name: 'saruar'})
+    });
   }
   finally {
 
