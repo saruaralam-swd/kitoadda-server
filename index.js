@@ -19,9 +19,7 @@ async function run() {
     await client.connect()
     console.log('DB Connected'.yellow.italic);
 
-    app.get('/', (req, res) => {
-      res.send('kitoAdda server is running')
-    });
+  
 
   }
   finally {
@@ -30,6 +28,10 @@ async function run() {
 }
 
 run().catch(error => console.log(error.name.bgRed, error.message.bold));
+
+app.get('/', (req, res) => {
+  res.send('kitoAdda server is running')
+});
 
 app.listen(port, () => {
   console.log(`server run on the port ${port}`.cyan);
