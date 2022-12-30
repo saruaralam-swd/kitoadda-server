@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 require('colors');
 
@@ -25,13 +25,54 @@ async function run() {
       const data = req.body;
       const result = await postCollection.insertOne(data);
       res.send(result);
-    })
+    });
 
-    app.get('/allPost', async(req, res) => {
+    app.get('/allPost', async (req, res) => {
       const query = {};
-      const result = await postCollection.find(query).toArray();
+      const result = await postCollection.find(query).sort({ date: -1 }).toArray();
       res.send(result);
-    })
+    });
+
+    // store user info in Data base
+    app.post('/user', async (req, res) => {
+      const user = req.body;
+      const email = user.email;
+      const query = { email }
+      const reqEmail = await userCollection.findOne(query);
+
+      if (!reqEmail) {
+        const result = await userCollection.insertOne(user);
+        res.send(result);
+      }
+      else {
+        res.send({ acknowledged: true })
+      }
+    });
+
+    app.get('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email }
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.put('/like/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) }
+      const options = { upsert: true };
+
+      const postData = await postCollection.findOne(filter);
+      let likeCount = postData.likeCount;
+      let newLikeCount = likeCount + 1;
+
+      const updateDoc = {
+        $set: {
+          likeCount: newLikeCount,
+        }
+      };
+      const result = await postCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
   }
 
   finally {
