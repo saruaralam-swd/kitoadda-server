@@ -20,6 +20,7 @@ async function run() {
 
     const postCollection = client.db('KitoAdda').collection('allPost');
     const userCollection = client.db('KitoAdda').collection('users');
+    const commentCollection = client.db('KitoAdda').collection('comments');
 
     app.post('/postData', async (req, res) => {
       const data = req.body;
@@ -32,6 +33,13 @@ async function run() {
       const result = await postCollection.find(query).sort({ date: -1 }).toArray();
       res.send(result);
     });
+
+    app.get('/allPostHome', async (req, res) => {
+      const query = {};
+      const result = await postCollection.find(query).sort({ likeCount: -1 }).limit(3).toArray();
+      res.send(result);
+    });
+
 
     // store user info in Data base
     app.post('/user', async (req, res) => {
@@ -47,6 +55,31 @@ async function run() {
       else {
         res.send({ acknowledged: true })
       }
+    });
+
+    app.put('/user', async (req, res) => {
+      const reqUserData = req.body;
+      const newName = reqUserData.name;
+      const newEmail = reqUserData.email;
+      const newAddress = reqUserData.address;
+      const newEducation = reqUserData.education;
+      
+      const reqEmail = req.query.email;
+      const filter = { email: reqEmail }
+      const userData = await userCollection.findOne(filter);
+
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          name: newName,
+          email: newEmail,
+          address: newAddress,
+          education: newEducation,
+        }
+      };
+
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
 
     app.get('/users/:email', async (req, res) => {
@@ -73,6 +106,21 @@ async function run() {
       const result = await postCollection.updateOne(filter, updateDoc, options);
       res.send(result);
     });
+
+    app.post('/comment', async (req, res) => {
+      const data = req.body;
+      const result = await commentCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get('/allComments', async (req, res) => {
+      const query = {};
+      const result = await commentCollection.find(query).sort({ date: -1 }).toArray();
+      res.send(result);
+    });
+
+
+
   }
 
   finally {
