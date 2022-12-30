@@ -17,8 +17,16 @@ async function run() {
   try {
     await client.connect()
     console.log('DB Connected'.yellow.italic);
+  }
 
-    const postCollection = client.db('KitoAdda').collection('allPost');
+  finally {
+
+  }
+}
+run().catch(error => console.log(error.name.bgRed, error.message.bold));
+
+
+const postCollection = client.db('KitoAdda').collection('allPost');
     const userCollection = client.db('KitoAdda').collection('users');
     const commentCollection = client.db('KitoAdda').collection('comments');
 
@@ -121,14 +129,6 @@ async function run() {
 
 
 
-  }
-
-  finally {
-
-  }
-}
-
-run().catch(error => console.log(error.name.bgRed, error.message.bold));
 
 
 app.get('/', (req, res) => {
